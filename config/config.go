@@ -120,8 +120,8 @@ func GetGinRunMode() string {
 }
 
 type Common struct {
-	CommonEtcd  CommonEtcd
-	CommonRedis CommonRedis
+	CommonEtcd  CommonEtcd  `mapstructure:"common-etcd"`
+	CommonRedis CommonRedis `mapstructure:"common-redis"`
 }
 
 type CommonEtcd struct {
@@ -184,6 +184,7 @@ type ConnectTcp struct {
 type ConnectConfig struct {
 	ConnectBase                 ConnectBase                 `mapstructure:"connect-base"`
 	ConnectRpcAddressWebsockets ConnectRpcAddressWebsockets `mapstructure:"connect-rpcAddress-websockets"`
+	ConnectRpcAddressTcp        ConnectRpcAddressTcp        `mapstructure:"connect-rpcAddress-tcp"`
 	ConnectBucket               ConnectBucket               `mapstructure:"connect-bucket"`
 	ConnectWebsocket            ConnectWebsocket            `mapstructure:"connect-websocket"`
 	ConnectTcp                  ConnectTcp                  `mapstructure:"connect-tcp"`
