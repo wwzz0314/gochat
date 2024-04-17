@@ -58,9 +58,9 @@ func Test_TcpClient(t *testing.T) {
 	//2,send msg to tcp conn
 	//3,receive msg from tcp conn
 	roomId := 1                                                      //@todo default roomId
-	authToken := "1kHYNlHaQTjGd0BWuECkw80ZAIquoU30f0gFPxqpEhQ="      //@todo need you modify
+	authToken := "TZBJvEdsXHxO1vP9iaXoDV5sumeCU0Tcq8MOMQUgaWk="      //@todo need you modify
 	fromUserId := 3                                                  //@todo need you modify
-	tcpAddrRemote, _ := net.ResolveTCPAddr("tcp4", "127.0.0.1:7001") //@todo default connect address
+	tcpAddrRemote, _ := net.ResolveTCPAddr("tcp4", "127.0.0.1:7000") //@todo default connect address
 	conn, err := net.DialTCP("tcp", nil, tcpAddrRemote)
 	defer func() {
 		_ = conn.Close()
@@ -135,8 +135,8 @@ func Test_TcpClient(t *testing.T) {
 			//test package, BigEndian
 			_ = pack.Pack(conn) //写入要发送的消息
 		}
-		fmt.Println("time wait , you can remove the code!")
-		time.Sleep(10 * time.Second)
+		//fmt.Println("time wait , you can remove the code!")
+		//time.Sleep(10 * time.Second)
 		msg := &proto.SendTcp{
 			Msg:          "from tcp client,time is:" + time.Now().Format("2006-01-02 15:04:05"),
 			FromUserId:   fromUserId,

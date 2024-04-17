@@ -99,7 +99,7 @@ func (task *Task) InitConnectRpcClient() (err error) {
 	}
 	for _, connectConf := range d.GetServices() {
 		logrus.Infof("key is: %s, value is %s", connectConf.Key, connectConf.Value)
-		serverType := getParamByKey(connectConf.Value, "severType")
+		serverType := getParamByKey(connectConf.Value, "serverType")
 		serverId := getParamByKey(connectConf.Value, "serverId")
 		logrus.Infof("serverType is %s, serverId is %s", serverType, serverId)
 		if serverType == "" || serverId == "" {

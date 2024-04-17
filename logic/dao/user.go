@@ -24,16 +24,14 @@ func (u *User) Add() (userId int, err error) {
 	if u.UserName == "" || u.Password == "" {
 		return 0, errors.New("user_name or password empty")
 	}
-	oUser := u.CheckHaveUserName(u.UserName)
-	if oUser.Id > 0 {
-		return oUser.Id, nil
-	}
 	u.CreateTime = time.Now()
 	if err = dbIns.Create(&u).Error; err != nil {
 		return 0, err
 	}
 	return u.Id, nil
 }
+
+// TODO CheckHaveUserName 可以使用 bool 过滤器，减轻数据库的压力
 
 func (u *User) CheckHaveUserName(userName string) (data User) {
 	dbIns.Where("user_name=?", userName).Take(&data)

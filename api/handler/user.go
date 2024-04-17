@@ -21,7 +21,7 @@ func Login(c *gin.Context) {
 	}
 	req := &proto.LoginRequest{
 		Name:     formLogin.UserName,
-		Password: formLogin.Password,
+		Password: tools.Sha1(formLogin.Password),
 	}
 	code, authToken, msg := rpc.RpcLogicObj.Login(req)
 	if code == tools.CodeFail || authToken == "" {
@@ -44,27 +44,18 @@ func Register(c *gin.Context) {
 	}
 	req := &proto.RegisterRequest{
 		Name:     formRegister.UserName,
-		Password: formRegister.Password,
+		Password: tools.Sha1(formRegister.Password),
 	}
-	code, authToken, msg := rpc.RpcLogicObj.Register(req)
-	if code == tools.CodeFail || authToken == "" {
+	code, msg := rpc.RpcLogicObj.Register(req)
+	if code == tools.CodeFail {
 		tools.FailWithMsg(c, msg)
 		return
 	}
-	tools.SuccessWithMsg(c, "register success", authToken)
-}
-
-type FormCheckAuth struct {
-	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
+	tools.SuccessWithMsg(c, "register success", nil)
 }
 
 func CheckAuth(c *gin.Context) {
-	var formCheckAuth FormCheckAuth
-	if err := c.ShouldBindBodyWith(&formCheckAuth, binding.JSON); err != nil {
-		tools.FailWithMsg(c, err.Error())
-		return
-	}
-	authToken := formCheckAuth.AuthToken
+	authToken := c.Request.Header.Get("Authorization")
 	req := &proto.CheckAuthRequest{
 		AuthToken: authToken,
 	}
@@ -80,17 +71,8 @@ func CheckAuth(c *gin.Context) {
 	tools.SuccessWithMsg(c, "auth success", jsonData)
 }
 
-type formLogout struct {
-	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
-}
-
 func Logout(c *gin.Context) {
-	var formLogout formLogout
-	if err := c.ShouldBindBodyWith(&formLogout, binding.JSON); err != nil {
-		tools.FailWithMsg(c, err.Error())
-		return
-	}
-	authToken := formLogout.AuthToken
+	authToken := c.Request.Header.Get("Authorization")
 	logoutReq := &proto.LogoutRequest{
 		AuthToken: authToken,
 	}

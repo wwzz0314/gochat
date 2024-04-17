@@ -19,7 +19,7 @@ writer = 32
 writeBuf = 1024
 writeBufSize = 8192
 
-[connect-rpcAddress-websockts]
+[connect-rpcAddress-websockets]
 address = "tcp@0.0.0.0:6912,tcp@0.0.0.0:6913"
 
 

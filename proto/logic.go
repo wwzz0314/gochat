@@ -26,8 +26,7 @@ type RegisterRequest struct {
 }
 
 type RegisterReply struct {
-	Code      int
-	AuthToken string
+	Code int
 }
 
 type LogoutRequest struct {

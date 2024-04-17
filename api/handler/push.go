@@ -5,16 +5,16 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"gochat/api/rpc"
 	"gochat/config"
+	"gochat/logic/dao"
 	"gochat/proto"
 	"gochat/tools"
 	"strconv"
 )
 
 type FormPush struct {
-	Msg       string `form:"msg" json:"msg" binding:"required"`
-	ToUserId  string `form:"toUserId" json:"toUserId" binding:"required"`
-	RoomId    int    `form:"roomId" json:"roomId" binding:"required"`
-	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
+	Msg      string `form:"msg" json:"msg" binding:"required"`
+	ToUserId string `form:"toUserId" json:"toUserId" binding:"required"`
+	RoomId   int    `form:"roomId" json:"roomId" binding:"required"`
 }
 
 func Push(c *gin.Context) {
@@ -23,7 +23,6 @@ func Push(c *gin.Context) {
 		tools.FailWithMsg(c, err.Error())
 		return
 	}
-	authToken := formPush.AuthToken
 	msg := formPush.Msg
 	toUserId := formPush.ToUserId
 	toUserIdInt, _ := strconv.Atoi(toUserId)
@@ -33,17 +32,17 @@ func Push(c *gin.Context) {
 		tools.FailWithMsg(c, "rpc fail friend userName")
 		return
 	}
-	checkAuthReq := &proto.CheckAuthRequest{AuthToken: authToken}
-	code, fromUserId, formUserName := rpc.RpcLogicObj.CheckAuth(checkAuthReq)
-	if code == tools.CodeFail {
+	user, ok := c.Get("user")
+	fromUser, ok := (user).(dao.User)
+	if !ok {
 		tools.FailWithMsg(c, "rpc fail get self info")
 		return
 	}
 	roomId := formPush.RoomId
 	req := &proto.Send{
 		Msg:          msg,
-		FromUserId:   fromUserId,
-		FromUserName: formUserName,
+		FromUserId:   fromUser.Id,
+		FromUserName: fromUser.UserName,
 		ToUserId:     toUserIdInt,
 		ToUserName:   toUserName,
 		RoomId:       roomId,

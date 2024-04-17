@@ -2,12 +2,13 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"gochat/api/handler"
 	"gochat/api/rpc"
+	"gochat/logic/dao"
 	"gochat/proto"
 	"gochat/tools"
 	"net/http"
+	"strings"
 )
 
 func Register() *gin.Engine {
@@ -27,7 +28,7 @@ func initUserRouter(r *gin.Engine) {
 	userGroup.POST("/register", handler.Register)
 	userGroup.Use(CheckSessionId())
 	{
-		userGroup.POST("/checkAuth", handler.CheckAuth)
+		userGroup.GET("/checkAuth", handler.CheckAuth)
 		userGroup.POST("/logout", handler.Logout)
 	}
 }
@@ -49,21 +50,29 @@ type FormCheckSessionId struct {
 
 func CheckSessionId() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var formCheckSessionId FormCheckSessionId
-		if err := c.ShouldBindBodyWith(&formCheckSessionId, binding.JSON); err != nil {
+		authToken := c.Request.Header.Get("Authorization")
+		authToken = strings.Trim(authToken, "Bearer")
+		authToken = strings.TrimSpace(authToken)
+		c.Request.Header.Set("Authorization", authToken)
+		if authToken == "" {
 			c.Abort()
-			tools.ResponseWithCode(c, tools.CodeSessionError, nil, nil)
+			tools.ResponseWithCode(c, tools.CodeSessionError, "UnAuthorized", nil)
 			return
 		}
-		authToken := formCheckSessionId.AuthToken
 		req := &proto.CheckAuthRequest{
 			AuthToken: authToken,
 		}
 		code, userId, userName := rpc.RpcLogicObj.CheckAuth(req)
 		if code == tools.CodeFail || userId <= 0 || userName == "" {
 			c.Abort()
-			tools.ResponseWithCode(c, tools.CodeSessionError, nil, nil)
+			tools.ResponseWithCode(c, tools.CodeSessionError, "UnAuthorized", nil)
 			return
+		} else {
+			user := dao.User{
+				Id:       userId,
+				UserName: userName,
+			}
+			c.Set("user", user)
 		}
 		c.Next()
 		return

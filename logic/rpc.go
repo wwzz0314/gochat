@@ -22,7 +22,7 @@ func (rpc *RpcLogic) Register(ctx context.Context, args *proto.RegisterRequest, 
 	u := new(dao.User)
 	uData := u.CheckHaveUserName(args.Name)
 	if uData.Id > 0 {
-		return errors.New("this user name already have, please login !!!")
+		return errors.New("this user name already have, please login")
 	}
 	u.UserName = args.Name
 	u.Password = args.Password
@@ -34,21 +34,7 @@ func (rpc *RpcLogic) Register(ctx context.Context, args *proto.RegisterRequest, 
 	if userId == 0 {
 		return errors.New("register userId empty")
 	}
-	randToken := tools.GetRandomToken(32)
-	sessionId := tools.CreateSessionId(randToken)
-	userData := make(map[string]interface{})
-	userData["userId"] = userId
-	userData["userName"] = args.Name
-	RedisSessClient.Do(ctx, "MULTI")
-	RedisSessClient.HMSet(ctx, sessionId, userData)
-	RedisSessClient.Expire(ctx, sessionId, 86400*time.Second)
-	err = RedisSessClient.Do(ctx, "EXEC").Err()
-	if err != nil {
-		logrus.Infof("register set rediis token fail!")
-		return err
-	}
 	reply.Code = config.SuccessReplyCode
-	reply.AuthToken = randToken
 	return
 }
 
@@ -273,7 +259,7 @@ func (rpc *RpcLogic) Connect(ctx context.Context, args *proto.ConnectRequest, re
 	roomUserKey := logic.getRoomUserKey(strconv.Itoa(args.RoomId))
 	if reply.UserId != 0 {
 		userKey := logic.getUserKey(fmt.Sprintf("%d", reply.UserId))
-		logrus.Infof("logic rediis set userKey: %s, sserverId : %s", userKey, args.ServerId)
+		logrus.Infof("logic redis set userKey: %s, serverId : %s", userKey, args.ServerId)
 		validTime := config.RedisBaseValidTime * time.Second
 		err = RedisClient.Set(ctx, userKey, args.ServerId, validTime).Err()
 		if err != nil {
@@ -284,7 +270,7 @@ func (rpc *RpcLogic) Connect(ctx context.Context, args *proto.ConnectRequest, re
 			RedisClient.Incr(ctx, logic.getRoomOnlineCountKey(fmt.Sprintf("%d", args.RoomId)))
 		}
 	}
-	logrus.Infof("logiic rpc userId:  %d", reply.UserId)
+	logrus.Infof("logic rpc userId:  %d", reply.UserId)
 	return
 }
 

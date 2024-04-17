@@ -52,7 +52,7 @@ func (c *Connect) Run() {
 	})
 	c.ServerId = fmt.Sprintf("%s-%s", "ws", uuid.New().String())
 	// init Connect layer rpc server, task layer will call this
-	if err := c.InitConnectTcpRpcServer(); err != nil {
+	if err := c.InitConnectWebsocketRpcServer(); err != nil {
 		logrus.Panicf("InitConnectWebsocketRpcServer Fatal error: %s \n", err.Error())
 	}
 

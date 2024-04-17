@@ -68,14 +68,13 @@ func (rpc *RpcLogic) Login(req *proto.LoginRequest) (code int, authToken string,
 	return
 }
 
-func (rpc *RpcLogic) Register(req *proto.RegisterRequest) (code int, authToken string, msg string) {
+func (rpc *RpcLogic) Register(req *proto.RegisterRequest) (code int, msg string) {
 	reply := &proto.RegisterReply{}
 	err := LogicRpcClient.Call(context.Background(), "Register", req, reply)
 	if err != nil {
 		msg = err.Error()
 	}
 	code = reply.Code
-	authToken = reply.AuthToken
 	return
 }
 
@@ -105,7 +104,7 @@ func (rpc *RpcLogic) Logout(req *proto.LogoutRequest) (code int) {
 
 func (rpc *RpcLogic) Push(req *proto.Send) (code int, msg string) {
 	reply := &proto.SuccessReply{}
-	LogicRpcClient.Call(context.Background(), "PushRoom", req, reply)
+	LogicRpcClient.Call(context.Background(), "Push", req, reply)
 	code = reply.Code
 	msg = reply.Msg
 	return

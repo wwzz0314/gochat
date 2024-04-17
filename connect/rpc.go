@@ -36,12 +36,11 @@ func (c *Connect) InitLogicRpcClient() (err error) {
 		Password:          config.Conf.Common.CommonEtcd.Password,
 	}
 	once.Do(func() {
-		d, e := etcdV3.NewEtcdDiscovery(
+		d, e := etcdV3.NewEtcdV3Discovery(
 			config.Conf.Common.CommonEtcd.BasePath,
 			config.Conf.Common.CommonEtcd.ServerPathLogic,
 			[]string{config.Conf.Common.CommonEtcd.Host},
 			true,
-
 			etcdConfigOption,
 		)
 		if e != nil {
@@ -74,7 +73,7 @@ func (rpc *RpcConnect) DisConnect(disConnReq *proto.DisConnectRequest) (err erro
 	return
 }
 
-func (c *Connect) InitConnectWebsocketRpcServer(err error) {
+func (c *Connect) InitConnectWebsocketRpcServer() (err error) {
 	var network, addr string
 	connectRpcAddress := strings.Split(config.Conf.Connect.ConnectRpcAddressWebsockets.Address, ",")
 	for _, bind := range connectRpcAddress {
@@ -82,7 +81,7 @@ func (c *Connect) InitConnectWebsocketRpcServer(err error) {
 			logrus.Panicf("InitConnectWebsocketRpcSever ParseNetwwork error: %s", err)
 		}
 		logrus.Infof("Connect start run at-->%s:%s", network, addr)
-		go c.createConnectWebsocktsRpcServer(network, addr)
+		go c.createConnectWebsocketsRpcServer(network, addr)
 	}
 	return
 }
@@ -94,7 +93,7 @@ func (c *Connect) InitConnectTcpRpcServer() (err error) {
 		if network, addr, err = tools.ParseNetwork(bind); err != nil {
 			logrus.Panicf("InitConnectTcpRpcServer ParseNetwork error: %s", err)
 		}
-		logrus.Infof("Connect sstart run at-->%s:%s", network, addr)
+		logrus.Infof("Connect start run at-->%s:%s", network, addr)
 		go c.createConnectTcpRpcServer(network, addr)
 	}
 	return
@@ -155,7 +154,7 @@ func (rpc *RpcConnectPush) PushRoomInfo(ctx context.Context, pushRoomMsgReq *pro
 	return
 }
 
-func (c *Connect) createConnectWebsocktsRpcServer(network string, addr string) {
+func (c *Connect) createConnectWebsocketsRpcServer(network string, addr string) {
 	s := server.NewServer()
 	addRegistryPlugin(s, network, addr)
 	//config.Conf.Connect.ConnectTcp.ServerId
