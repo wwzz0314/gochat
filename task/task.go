@@ -16,8 +16,12 @@ func New() *Task {
 func (task *Task) Run() {
 	taskConfig := config.Conf.Task
 	runtime.GOMAXPROCS(taskConfig.TaskBase.CpuNum)
-	if err := task.InitQueueRedisClient(); err != nil {
-		logrus.Panicf("task init publishRedisClient fail, err: %s", err.Error())
+	//if err := task.InitQueueRedisClient(); err != nil {
+	//	logrus.Panicf("task init publishRedisClient fail, err: %s", err.Error())
+	//}
+	consumer := Consumer{Task: task}
+	if err := task.InitConsumerGroup(consumer); err != nil {
+		logrus.Panicf("task init consumer err: %s", err)
 	}
 	if err := task.InitConnectRpcClient(); err != nil {
 		logrus.Panicf("task init InitConnectRpcClient fail, err: %s", err.Error())

@@ -22,9 +22,13 @@ func (logic *Logic) Run() {
 	runtime.GOMAXPROCS(logicConfig.LogicBase.CpuNum)
 	logic.ServerId = fmt.Sprintf("logic-%s", uuid.New().String())
 
-	// init publish redis
+	//init redis
 	if err := logic.InitPublishRedisClient(); err != nil {
 		logrus.Panicf("logic init publishRedisClient fail, err:%s")
+	}
+
+	if err := logic.InitKafkaProducer(); err != nil {
+		logrus.Panicf("logic init kafka producer fail, err:%s", err)
 	}
 
 	// init rpc server

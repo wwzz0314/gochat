@@ -203,12 +203,15 @@ type LogicConfig struct {
 }
 
 type TaskBase struct {
-	CpuNum        int    `mapstructure:"cpuNum"`
-	RedisAddr     string `mapstructure:"redisAddr"`
-	RedisPassword string `mapstructure:"redisPassword"`
-	RpcAddress    string `mapstructure:"rpcAddress"`
-	PushChan      int    `mapstructure:"pushChan"`
-	PushChanSize  int    `mapstructure:"pushChanSize"`
+	CpuNum             int    `mapstructure:"cpuNum"`
+	RedisAddr          string `mapstructure:"redisAddr"`
+	RedisPassword      string `mapstructure:"redisPassword"`
+	RpcAddress         string `mapstructure:"rpcAddress"`
+	PushChan           int    `mapstructure:"pushChan"`
+	PushChanSize       int    `mapstructure:"pushChanSize"`
+	KafkaServerAddress string `mapstructure:"kafkaServerAddress"`
+	ConsumerGroup      string `mapstructure:"consumerGroup"`
+	ConsumerTopic      string `mapstructure:"consumerTopic"`
 }
 
 type TaskConfig struct {

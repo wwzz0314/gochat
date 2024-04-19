@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/IBM/sarama"
 	"github.com/go-redis/redis/v8"
 	"github.com/rcrowley/go-metrics"
 	"github.com/rpcxio/rpcx-etcd/serverplugin"
@@ -13,12 +14,14 @@ import (
 	"gochat/config"
 	"gochat/proto"
 	"gochat/tools"
+	"strconv"
 	"strings"
 	"time"
 )
 
 var RedisClient *redis.Client
 var RedisSessClient *redis.Client
+var Producer sarama.SyncProducer
 
 func (logic *Logic) InitPublishRedisClient() (err error) {
 	redisOpt := tools.RedisOption{
@@ -31,6 +34,12 @@ func (logic *Logic) InitPublishRedisClient() (err error) {
 		logrus.Infof("RedisCli Ping Result pong: %s, err: %s", pong, err)
 	}
 	RedisSessClient = RedisClient
+	return err
+}
+
+func (logic *Logic) InitKafkaProducer() (err error) {
+	kafkaOption := tools.KafkaOption{Address: config.Conf.Task.TaskBase.KafkaServerAddress}
+	Producer, err = tools.GetProducerInstance(kafkaOption)
 	return err
 }
 
@@ -97,6 +106,28 @@ func (logic *Logic) RedisPublishChannel(serverId string, toUserId int, msg []byt
 		return err
 	}
 	return
+}
+
+func (logic *Logic) PublishChannel(serverId string, toUserId int, msg []byte) (err error) {
+	// 这里 redisMsg 就是生产者要生产的消息
+	redisMsg := proto.RedisMsg{
+		Op:       config.OpSingleSend,
+		ServerId: serverId,
+		UserId:   toUserId,
+		Msg:      msg,
+	}
+	redisMsgStr, err := json.Marshal(redisMsg)
+	if err != nil {
+		logrus.Errorf("logic, kafka produce message err %s", err.Error())
+		return err
+	}
+	producerMessage := &sarama.ProducerMessage{
+		Topic: config.Conf.Task.TaskBase.ConsumerTopic,
+		Key:   sarama.StringEncoder(strconv.Itoa(toUserId)),
+		Value: sarama.StringEncoder(redisMsgStr),
+	}
+	_, _, err = Producer.SendMessage(producerMessage)
+	return err
 }
 
 func (logic *Logic) RedisPublishRoomInfo(roomId int, count int, RoomUserInfo map[string]string, msg []byte) (err error) {

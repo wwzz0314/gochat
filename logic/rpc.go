@@ -162,7 +162,8 @@ func (rpc *RpcLogic) Push(ctx context.Context, args *proto.Send, reply *proto.Su
 		logrus.Errorf("logic, push parse int fail: %s", err.Error())
 		return
 	}
-	err = logic.RedisPublishChannel(serverIdStr, sendData.ToUserId, bodyBytes)
+	//err = logic.RedisPublishChannel(serverIdStr, sendData.ToUserId, bodyBytes)
+	err = logic.PublishChannel(serverIdStr, sendData.ToUserId, bodyBytes)
 	if err != nil {
 		logrus.Errorf("logic, redis publish err: %s", err.Error())
 		return
